@@ -1,0 +1,21 @@
+{
+  "name": "logic-gates",
+  "version": "1.0.0",
+  "description": "A Hardware Description Language for logic gates interpreted by js",
+  "main": "interpreter.js",
+  "scripts": {
+    "start": "npm test",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mLuby/logic-gates.git"
+  },
+  "keywords": ["gates", "hdl", "logic", "logic gates"],
+  "author": "Mike Luby <Michael@mLuby.com> (https://github.com/mLuby)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mLuby/logic-gates/issues"
+  },
+  "homepage": "https://github.com/mLuby/logic-gates"
+}
