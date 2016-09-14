@@ -18,27 +18,36 @@ fs.readdirSync(normalizedPath).forEach(function(file) {
 // interpret gates
 function gateFuncFromHdl (HDL) {
   return function gateFunc (IN) {
-    if (HDL.FUNC) {return HDL.FUNC(IN)} // covers nand/nor
-    const knownValues = Object.assign({}, IN)
-    const partsLeftToEvaluate = HDL.PARTS.slice()
-    let newKnownValuesAdded = true
-    while (newKnownValuesAdded) {
-      newKnownValuesAdded = false
-      partsLeftToEvaluate.forEach((PART, PART_INDEX) => {
-        const knownValuesForPart = fillInAValsFromB(PART.IN, knownValues)
-        // if each part.IN is in known values
-        if (eq(keys(PART.IN), keys(knownValuesForPart))) {
-          PART.func = gateFuncFromHdl(GATE_HDLS[PART.NAME])
-          const results = PART.func(knownValuesForPart)
-          // storing results in known values
-          keys(PART.OUT).forEach(outKey => knownValues[PART.OUT[outKey]] = results[outKey])
-          // remove part from parts to evaluate
-          partsLeftToEvaluate.splice(PART_INDEX, 1)
-          newKnownValuesAdded = true
-        }
-      })
+    if (HDL.FUNC) { // covers fundamental gate (nand/nor)
+      const result = HDL.FUNC(IN)
+      result.COUNT = 1
+      return result
+    } else {
+      let COUNT = 0
+      const knownValues = Object.assign({}, IN)
+      const partsLeftToEvaluate = HDL.PARTS.slice()
+      let newKnownValuesAdded = true
+      while (newKnownValuesAdded) {
+        newKnownValuesAdded = false
+        partsLeftToEvaluate.forEach((PART, PART_INDEX) => {
+          const knownValuesForPart = fillInAValsFromB(PART.IN, knownValues)
+          // if each part.IN is in known values
+          if (eq(keys(PART.IN), keys(knownValuesForPart))) {
+            PART.FUNC = gateFuncFromHdl(GATE_HDLS[PART.NAME])
+            const results = PART.FUNC(knownValuesForPart)
+            COUNT += results.COUNT
+            // storing results in known values
+            keys(PART.OUT).forEach(outKey => knownValues[PART.OUT[outKey]] = results[outKey])
+            // remove part from parts to evaluate
+            partsLeftToEvaluate.splice(PART_INDEX, 1)
+            newKnownValuesAdded = true
+          }
+        })
+      }
+      const result = fillInAValsFromB(HDL.OUT, knownValues)
+      result.COUNT = COUNT
+      return result
     }
-    return fillInAValsFromB(HDL.OUT, knownValues)
   }
 }
 
